@@ -59,7 +59,7 @@ class Rezognizer(private val scanner: Scanner) {
 }
 
 fun main(args: Array<String>) {
-    if (Rezognizer(MockupScanner(listOf(Token(1, "1.0", 1, 1)))).recognize()) {
+    if (Rezognizer(MockupScanner(Example, File(args[0]).inputStream).recognize())) {
         print("accept")
     } else {
         print("reject")
