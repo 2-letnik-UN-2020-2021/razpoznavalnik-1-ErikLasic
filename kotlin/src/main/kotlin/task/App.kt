@@ -193,45 +193,12 @@ class Parser(private val scanner: Scanner) {
 
     fun parse(): Boolean {
         last = scanner.getToken()
-        val status = recognizeE()
+        /*val status = recognizeE()
         return if (last == null) status
-        else false
+        else false */
+        return E() && last==null
     }
 
-    fun recognizeE() = recognizeT() && recognizeE_()
-
-    fun recognizeT(): Boolean {
-        val lookahead = last?.value
-        return when (lookahead) {
-            plus -> recognizeTerminal(plus) && recognizeE()
-            minus -> recognizeTerminal(minus) && recognizeE()
-            rparen -> true
-            null-> true
-            else -> false
-        }
-    }
-
-    fun recognizeT_(): Boolean {
-        val lookahead = last?.value
-        return when (lookahead) {
-            plus -> recognizeTerminal(plus) && recognizeE()
-            minus -> recognizeTerminal(minus) && recognizeE()
-            rparen -> true
-            null-> true
-            else -> false
-        }
-    }
-
-    fun recognizeE_(): Boolean {
-        val lookahead = last?.value
-        return when (lookahead) {
-            plus -> recognizeTerminal(plus) && recognizeE()
-            minus -> recognizeTerminal(minus) && recognizeE()
-            rparen -> true
-            null-> true
-            else -> false
-        }
-    }
 
     // ...
     // E ::= T EE;
