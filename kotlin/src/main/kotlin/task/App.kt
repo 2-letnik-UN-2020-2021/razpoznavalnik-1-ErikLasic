@@ -21,14 +21,14 @@ interface Automaton {
 
 object Example : Automaton {
     override val states = setOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
-    override val alphabet = 0 .. 255
+    override val alphabet = 0..255
     override val startState = 1
     override val finalStates = setOf(2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
 
     private val numberOfStates = states.maxOrNull()!! + 1
     private val numberOfSymbols = alphabet.maxOrNull()!! + 1
-    private val transitions = Array(numberOfStates) {IntArray(numberOfSymbols)}
-    private val values: Array<Int> = Array(numberOfStates) {0}
+    private val transitions = Array(numberOfStates) { IntArray(numberOfSymbols) }
+    private val values: Array<Int> = Array(numberOfStates) { 0 }
 
     private fun setTransition(from: Int, symbol: Char, to: Int) {
         transitions[from][symbol.code] = to
@@ -53,49 +53,49 @@ object Example : Automaton {
 
     init {
         for (i in '0'..'9') {
-            setTransition(1,i,2)
-            setTransition(2,i,2)
+            setTransition(1, i, 2)
+            setTransition(2, i, 2)
         }
-        setTransition(2,'.',3)
+        setTransition(2, '.', 3)
         for (i in '0'..'9') {
-            setTransition(3,i,4)
-            setTransition(4,i,4)
+            setTransition(3, i, 4)
+            setTransition(4, i, 4)
         }
         for (i in 'a'..'z') {
-            setTransition(1,i,5)
-            setTransition(5,i,5)
+            setTransition(1, i, 5)
+            setTransition(5, i, 5)
         }
         for (i in 'A'..'Z') {
-            setTransition(1,i,5)
-            setTransition(5,i,5)
+            setTransition(1, i, 5)
+            setTransition(5, i, 5)
         }
         for (i in '0'..'9') {
-            setTransition(5,i,6)
-            setTransition(6,i,6)
+            setTransition(5, i, 6)
+            setTransition(6, i, 6)
         }
-        setTransition(1,'+',7)
-        setTransition(1,'-',8)
-        setTransition(1,'*',9)
-        setTransition(1,'/',10)
-        setTransition(1,'^',11)
-        setTransition(1,'(',12)
-        setTransition(1,')',13)
-        setTransition(1,' ',14)
-        setTransition(1,'\n',14)
-        setTransition(1,'\r',14)
-        setTransition(1,'\t',14)
+        setTransition(1, '+', 7)
+        setTransition(1, '-', 8)
+        setTransition(1, '*', 9)
+        setTransition(1, '/', 10)
+        setTransition(1, '^', 11)
+        setTransition(1, '(', 12)
+        setTransition(1, ')', 13)
+        setTransition(1, ' ', 14)
+        setTransition(1, '\n', 14)
+        setTransition(1, '\r', 14)
+        setTransition(1, '\t', 14)
 
-        setValue(2,1)
-        setValue(4,1)
-        setValue(5,2)
-        setValue(6,2)
-        setValue(7,3)
-        setValue(8,4)
-        setValue(9,5)
-        setValue(10,6)
-        setValue(11,7)
-        setValue(12,8)
-        setValue(13,9)
+        setValue(2, 1)
+        setValue(4, 1)
+        setValue(5, 2)
+        setValue(6, 2)
+        setValue(7, 3)
+        setValue(8, 4)
+        setValue(9, 5)
+        setValue(10, 6)
+        setValue(11, 7)
+        setValue(12, 8)
+        setValue(13, 9)
 
     }
 }
@@ -196,7 +196,7 @@ class Rezognizer(private val scanner: Scanner) {
         if (lookahead == null) {
             true
         }
-        return when(lookahead) {
+        return when (lookahead) {
             PLUS -> recognizeTerminal(PLUS) && recognizeE()
             MINUS -> recognizeTerminal(MINUS) && recognizeE()
             RPAREN -> true
@@ -272,21 +272,23 @@ class Rezognizer(private val scanner: Scanner) {
             token = scanner.getToken()
             if (E() && next?.value == rparen) {
                 token = scanner.getToken()
-                return E()
+                return true
             }
         } else if (token?.value == float) {
             token = scanner.getToken()
+            return true
         } else if (token?.value == variable) {
             token = scanner.getToken()
+            return true
         }
+        return false
     }
 
     private fun recognizeTerminal(value: Int) =
         if (last?.value == value) {
             last = scanner.getToken()
             true
-        }
-        else false
+        } else false
 }
 
 fun main(args: Array<String>) {
