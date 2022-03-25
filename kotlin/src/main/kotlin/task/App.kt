@@ -180,22 +180,10 @@ fun printTokens(scanner: Scanner) {
 
 //Parser
 
-class MockupScanner(private var tokens: List<Token>) : Scanner {
-    override fun eof() = tokens.isEmpty()
-
-    override fun getToken() =
-        if (tokens.isEmpty()) null
-        else {
-            val token = tokens.first()
-            tokens = tokens.drop(1)
-            token
-        }
-}
-
 fun main(args: Array<String>) {
     val scanner = Scanner(Example, File(args[0]).inputStream())
     //printTokens(scanner)
-    if (Rezognizer(MockupScanner(listOf(Token(1, "1.0", 1, 1)))).recognize()) {
+    if (Rezognizer(scanner).recognize()) {
         print("accept")
     } else {
         print("reject")
