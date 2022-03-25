@@ -1,14 +1,8 @@
 package task
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.sym.LPAREN
-import com.sun.org.apache.xalan.internal.xsltc.compiler.sym.RPAREN
-import jdk.incubator.vector.VectorOperators.POW
 import java.io.File
 import java.io.InputStream
-import java.sql.Types.FLOAT
-import java.sql.Types.VARCHAR
 import java.util.LinkedList
-import javax.management.Query.*
 
 const val EOF_SYMBOL = -1
 const val ERROR_STATE = 0
@@ -184,106 +178,40 @@ fun printTokens(scanner: Scanner) {
     }
 }
 
+//Parser
 class Parser(private val scanner: Scanner) {
     private var last: Token? = null
-
-    // E ::= T EE;
-    fun E(): Boolean {
-        return T() && EE()
-    }
-
-    // EE ::= + T EE | - T EE | epsilon;
-    fun EE(): Boolean {
-        if (last?.value == PLUS) {
-            last = scanner.getToken()
-            return T() && EE()
-        } else if (last?.value == MINUS) {
-            last = scanner.getToken()
-            return T() && EE()
-        }
-        return true
-    }
-
-    // T ::= X TT;
-    fun T(): Boolean {
-        return X() && TT()
-    }
-
-    // TT ::= * X TT | / X TT | epsilon;
-    fun TT(): Boolean {
-        if (last?.value == TIMES) {
-            last = scanner.getToken()
-            return X() && TT()
-        } else if (last?.value == DIV) {
-            last = scanner.getToken()
-            return X() && TT()
-        }
-        return true
-    }
-
-    // X ::= Y XX;
-    fun X(): Boolean {
-        return Y() && XX()
-    }
-
-    // XX ::= ^ X | epsilon;
-    fun XX(): Boolean {
-        if (last?.value == POW) {
-            last = scanner.getToken()
-            return X()
-        }
-        return true
-    }
-
-    // Y ::= - F | + F | F
-    fun Y(): Boolean {
-        if (last?.value == MINUS) {
-            last = scanner.getToken()
-            return F()
-        } else if (last?.value == PLUS) {
-            last = scanner.getToken()
-            return F()
-        } else {
-            return F()
-        }
-    }
-
-    // F ::= ( E ) | float | variable;
-    fun F(): Boolean {
-        if (last?.value == LPAREN) {
-            last = scanner.getToken()
-            if (E() && last?.value == RPAREN) {
-                last = scanner.getToken()
-                return true
-            }
-        } else if (last?.value == FLOAT) {
-            last = scanner.getToken()
-            return true
-        } else if (last?.value == VARCHAR) {
-            last = scanner.getToken()
-            return true
-        }
-        return false
-    }
+    var float = 1
+    var variable = 2
+    var plus = 3
+    var minus = 4
+    var times = 5
+    var divide = 6
+    var pow = 7
+    var lparen = 8
+    var rparen = 9
 
     fun parse(): Boolean {
-
-        return E() && last == null
-    }
-}
-
-//Parser
-class Rezognizer(private val scanner: Scanner) {
-    private var last: Token? = null
-
-    fun recognize(): Boolean {
         last = scanner.getToken()
         val status = recognizeE()
         return if (last == null) status
         else false
     }
 
-    fun recognizeE() = (last?.let { recognizeTerminal(it.value) } == true) && recognizeE_()
+    fun recognizeE() = recognizeT() && recognizeE_()
+
+    fun recognizeT(): Boolean {
+        last = scanner.getToken()
+        E()
+        EE()
+        T()
+        TT()
+        X()
+        XX()
+        Y()
+        F()
+        return E() && last == null
+    }
 
     fun recognizeE_(): Boolean {
         val lookahead = last?.value
@@ -291,9 +219,9 @@ class Rezognizer(private val scanner: Scanner) {
             true
         }
         return when (lookahead) {
-            PLUS -> recognizeTerminal(PLUS) && recognizeE()
-            MINUS -> recognizeTerminal(MINUS) && recognizeE()
-            RPAREN -> true
+            plus -> recognizeTerminal(plus) && recognizeE()
+            minus -> recognizeTerminal(minus) && recognizeE()
+            rparen -> true
             else -> false
         }
     }
@@ -306,10 +234,10 @@ class Rezognizer(private val scanner: Scanner) {
 
     // EE ::= + T EE | - T EE | epsilon;
     fun EE(): Boolean {
-        if (last?.value == PLUS) {
+        if (last?.value == plus) {
             last = scanner.getToken()
             return T() && EE()
-        } else if (last?.value == MINUS) {
+        } else if (last?.value == minus) {
             last = scanner.getToken()
             return T() && EE()
         }
@@ -323,10 +251,10 @@ class Rezognizer(private val scanner: Scanner) {
 
     // TT ::= * X TT | / X TT | epsilon;
     fun TT(): Boolean {
-        if (last?.value == TIMES) {
+        if (last?.value == times) {
             last = scanner.getToken()
             return X() && TT()
-        } else if (last?.value == DIV) {
+        } else if (last?.value == divide) {
             last = scanner.getToken()
             return X() && TT()
         }
@@ -340,7 +268,7 @@ class Rezognizer(private val scanner: Scanner) {
 
     // XX ::= ^ X | epsilon;
     fun XX(): Boolean {
-        if (last?.value == POW) {
+        if (last?.value == pow) {
             last = scanner.getToken()
             return X()
         }
@@ -349,10 +277,10 @@ class Rezognizer(private val scanner: Scanner) {
 
     // Y ::= - F | + F | F
     fun Y(): Boolean {
-        if (last?.value == MINUS) {
+        if (last?.value == minus) {
             last = scanner.getToken()
             return F()
-        } else if (last?.value == PLUS) {
+        } else if (last?.value == plus) {
             last = scanner.getToken()
             return F()
         } else {
@@ -362,16 +290,16 @@ class Rezognizer(private val scanner: Scanner) {
 
     // F ::= ( E ) | float | variable;
     fun F(): Boolean {
-        if (last?.value == LPAREN) {
+        if (last?.value == lparen) {
             last = scanner.getToken()
-            if (E() && last?.value == RPAREN) {
+            if (E() && last?.value == rparen) {
                 last = scanner.getToken()
                 return true
             }
-        } else if (last?.value == FLOAT) {
+        } else if (last?.value == float) {
             last = scanner.getToken()
             return true
-        } else if (last?.value == VARCHAR) {
+        } else if (last?.value == variable) {
             last = scanner.getToken()
             return true
         }
