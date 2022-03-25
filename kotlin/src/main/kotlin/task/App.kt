@@ -197,8 +197,8 @@ class Rezognizer(private val scanner: Scanner) {
             true
         }
         return when(lookahead) {
-            PLUS -> recognizeTerminal(PLUS) && recognizeE()
-            MINUS -> recognizeTerminal(MINUS) && recognizeE()
+            plus -> recognizeTerminal(plus) && recognizeE()
+            minus -> recognizeTerminal(minus) && recognizeE()
             RPAREN -> true
             else -> false
         }
