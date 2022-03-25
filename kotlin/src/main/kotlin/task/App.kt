@@ -197,14 +197,89 @@ class Rezognizer(private val scanner: Scanner) {
             true
         }
         return when(lookahead) {
-            plus -> recognizeTerminal(plus) && recognizeE()
-            minus -> recognizeTerminal(minus) && recognizeE()
+            PLUS -> recognizeTerminal(PLUS) && recognizeE()
+            MINUS -> recognizeTerminal(MINUS) && recognizeE()
             RPAREN -> true
             else -> false
         }
     }
 
     // ...
+    // E ::= T EE;
+    fun E(): Boolean {
+        return T() && EE()
+    }
+
+    // EE ::= + T EE | - T EE | epsilon;
+    fun EE(): Boolean {
+        if (token?.value == plus) {
+            token = scanner.getToken()
+            return T() && EE()
+        } else if (token?.value == minus) {
+            token = scanner.getToken()
+            return T() && EE()
+        }
+        return true;
+    }
+
+    // T ::= X TT;
+    fun T(): Boolean {
+        return X() && TT()
+    }
+
+    // TT ::= * X TT | / X TT | epsilon;
+    fun TT(): Boolean {
+        if (token?.value == times) {
+            token = scanner.getToken()
+            return X() && TT()
+        } else if (token?.value == divide) {
+            token = scanner.getToken()
+            return X() && TT()
+        }
+        return true;
+    }
+
+    // X ::= Y XX;
+    fun X(): Boolean {
+        return Y() && XX()
+    }
+
+    // XX ::= ^ X | epsilon;
+    fun XX(): Boolean {
+        if (token?.value == pow) {
+            token = scanner.getToken()
+            return X()
+        }
+        return true;
+    }
+
+    // Y ::= - F | + F | F
+    fun Y(): Boolean {
+        if (token?.value == minus) {
+            token = scanner.getToken()
+            return F()
+        } else if (token?.value == plus) {
+            return F()
+        } else {
+            return F()
+        }
+        return true;
+    }
+
+    // F ::= ( E ) | float | variable;
+    fun F(): Boolean {
+        if (token?.value == lparen) {
+            token = scanner.getToken()
+            if (E() && next?.value == rparen) {
+                token = scanner.getToken()
+                return E()
+            }
+        } else if (token?.value == float) {
+            token = scanner.getToken()
+        } else if (token?.value == variable) {
+            token = scanner.getToken()
+        }
+    }
 
     private fun recognizeTerminal(value: Int) =
         if (last?.value == value) {
