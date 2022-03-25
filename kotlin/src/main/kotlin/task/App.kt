@@ -183,10 +183,9 @@ class Recognizer(private val scanner: Scanner) {
 }
 
 fun main(args: Array<String>) {
-    if (Recognizer(StreamScanner(Example, File(args[0]).InputStream())).recognize()) {
+    if (Recognizer(StreamScanner(Example, File(args[0]))).recognize()) {
         print("accept")
     } else {
         print("reject")
     }
 }
-//test3.1
