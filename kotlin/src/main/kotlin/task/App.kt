@@ -178,13 +178,6 @@ fun printTokens(scanner: Scanner) {
     }
 }
 
-data class Token(val value: Int, val lexeme: String, val startRow: Int, val startColumn: Int)
-
-interface Scanner {
-    fun eof(): Boolean
-    fun getToken(): Token?
-}
-
 class MockupScanner(private var tokens: List<Token>) : Scanner {
     override fun eof() = tokens.isEmpty()
 
@@ -234,8 +227,8 @@ class Rezognizer(private val scanner: Scanner) {
 
 fun main(args: Array<String>) {
     val scanner = Scanner(Example, File(args[0]).inputStream())
-    printTokens(scanner)
-    if (Rezognizer(MockupScanner(listOf(Token(1, "1.0", 1, 1)))).recognize()) {
+    //printTokens(scanner)
+    if (Rezognizer(MockupScanner(listOf(Token(scanner.getToken())))).recognize()) {
         print("accept")
     } else {
         print("reject")
