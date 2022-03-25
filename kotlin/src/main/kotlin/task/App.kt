@@ -1,8 +1,14 @@
 package task
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym.LPAREN
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym.RPAREN
+import jdk.incubator.vector.VectorOperators.POW
 import java.io.File
 import java.io.InputStream
+import java.sql.Types.FLOAT
+import java.sql.Types.VARCHAR
 import java.util.LinkedList
+import javax.management.Query.*
 
 const val EOF_SYMBOL = -1
 const val ERROR_STATE = 0
@@ -189,9 +195,9 @@ class Rezognizer(private val scanner: Scanner) {
         else false
     }
 
-    fun recognizeE() = recognizeT() && recognizeE_()
+    fun recognizeE() = last?.let { recognizeTerminal(it.value) } == true && recognizeE_()
 
-    fun recognizeE_() {
+    fun recognizeE_(): Boolean {
         val lookahead = last?.value
         if (lookahead == null) {
             true
@@ -212,14 +218,14 @@ class Rezognizer(private val scanner: Scanner) {
 
     // EE ::= + T EE | - T EE | epsilon;
     fun EE(): Boolean {
-        if (token?.value == plus) {
-            token = scanner.getToken()
+        if (last?.value == PLUS) {
+            last = scanner.getToken()
             return T() && EE()
-        } else if (token?.value == minus) {
-            token = scanner.getToken()
+        } else if (last?.value == MINUS) {
+            last = scanner.getToken()
             return T() && EE()
         }
-        return true;
+        return true
     }
 
     // T ::= X TT;
@@ -229,14 +235,14 @@ class Rezognizer(private val scanner: Scanner) {
 
     // TT ::= * X TT | / X TT | epsilon;
     fun TT(): Boolean {
-        if (token?.value == times) {
-            token = scanner.getToken()
+        if (last?.value == TIMES) {
+            last = scanner.getToken()
             return X() && TT()
-        } else if (token?.value == divide) {
-            token = scanner.getToken()
+        } else if (last?.value == DIV) {
+            last = scanner.getToken()
             return X() && TT()
         }
-        return true;
+        return true
     }
 
     // X ::= Y XX;
@@ -246,39 +252,39 @@ class Rezognizer(private val scanner: Scanner) {
 
     // XX ::= ^ X | epsilon;
     fun XX(): Boolean {
-        if (token?.value == pow) {
-            token = scanner.getToken()
+        if (last?.value == POW) {
+            last = scanner.getToken()
             return X()
         }
-        return true;
+        return true
     }
 
     // Y ::= - F | + F | F
     fun Y(): Boolean {
-        if (token?.value == minus) {
-            token = scanner.getToken()
+        if (last?.value == MINUS) {
+            last = scanner.getToken()
             return F()
-        } else if (token?.value == plus) {
+        } else if (last?.value == PLUS) {
+            last = scanner.getToken()
             return F()
         } else {
             return F()
         }
-        return true;
     }
 
     // F ::= ( E ) | float | variable;
     fun F(): Boolean {
-        if (token?.value == lparen) {
-            token = scanner.getToken()
-            if (E() && next?.value == rparen) {
-                token = scanner.getToken()
+        if (last?.value == LPAREN) {
+            last = scanner.getToken()
+            if (E() && last?.value == RPAREN) {
+                last = scanner.getToken()
                 return true
             }
-        } else if (token?.value == float) {
-            token = scanner.getToken()
+        } else if (last?.value == FLOAT) {
+            last = scanner.getToken()
             return true
-        } else if (token?.value == variable) {
-            token = scanner.getToken()
+        } else if (last?.value == VARCHAR) {
+            last = scanner.getToken()
             return true
         }
         return false
