@@ -4,9 +4,6 @@ import java.io.File
 import java.io.InputStream
 import java.util.LinkedList
 
-import java.io.InputStream
-import java.util.LinkedList
-
 const val EOF_SYMBOL = -1
 const val ERROR_STATE = 0
 const val SKIP_VALUE = 0
